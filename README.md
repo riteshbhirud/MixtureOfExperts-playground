@@ -214,17 +214,9 @@ output = W2(gate .* up)
 
 ## Testing and Validation
 
-Run the test suite:
+run the test_demo.jl file
 
-```julia
-julia test/test_moe_integration.jl
-```
-
-Run the complete example:
-
-```julia
-julia examples/simple_moe_replacement_example.jl
-```
+....in progress
 
 ##  Performance Analysis
 
