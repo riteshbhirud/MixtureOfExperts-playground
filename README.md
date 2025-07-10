@@ -296,4 +296,4 @@ MIT License - Feel free to use in your research and projects.
 
 ---
 
-*This implementation provides a complete, production-ready foundation for MoE in Julia transformers, ready for integration with existing codebases and future enhancement with dynamic scheduling capabilities.*
+*note: This implementation provides a complete but basic/rough foundation for MoE in Julia transformers, ready for integration with existing codebases and future enhancement with dynamic scheduling capabilities.* 
