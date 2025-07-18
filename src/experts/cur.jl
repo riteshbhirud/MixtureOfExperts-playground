@@ -8,6 +8,8 @@ struct CURDecomposition{C, U, R}
     rank::Int
 end
 
+Flux.@functor CURDecomposition (C, U, R)
+
 """
     cur_decompose(A::AbstractMatrix; rank::Int, oversample::Int=10)
 
