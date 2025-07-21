@@ -130,7 +130,13 @@ function moe_transformer!(token::Int, pos::Int, config::ModelConfig, s::RunState
         
         moe_output, moe_loss = w.moe_layer(input_matrix; training=training)
         
-        s.xb = vec(moe_output)
+        moe_vec = vec(moe_output)
+        if length(moe_vec) == length(s.xb)
+          s.xb .= moe_vec  # In-place assignment (more efficient)
+        else
+          resize!(s.xb, length(moe_vec))  # Handle size mismatch gracefully
+          s.xb .= moe_vec
+        end
         
         if training
             total_moe_loss += moe_loss
