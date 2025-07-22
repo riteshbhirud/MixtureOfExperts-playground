@@ -34,6 +34,7 @@ export StandardExpert, CURExpert, GatedExpert
 export create_moe_config, create_moe_layer
 export compute_gates, compute_loss
 export load_balance_score
+export reset_stats!
 
 include("gating/base.jl")
 include("gating/simple.jl")
