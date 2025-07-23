@@ -27,7 +27,7 @@ function moe_transformer!(token::Int, pos::Int, model::MoELanguageModel, state::
         layer_start_time = time()
         
         # Self-attention block
-        moe_attention!(state, layer, pos, config)
+        moe_attention!(state, layer, pos, config, layer_idx)
         
         # Residual connection after attention
         state.x .+= state.xb2
@@ -200,19 +200,13 @@ function gated_expert_forward!(output::Vector{Float32}, expert::MoEExpertWeights
     return nothing
 end
 
-"""
-    cur_expert_forward!(output::Vector{Float32}, expert::MoEExpertWeights, input::Vector{Float32})
-
-Compute forward pass through a CUR-compressed expert.
-Uses CUR decomposition matrices for efficient computation.
-"""
 function cur_expert_forward!(output::Vector{Float32}, expert::MoEExpertWeights, input::Vector{Float32})
     if !expert.is_cur_compressed
         # Fallback to gated computation if not CUR compressed
         gated_expert_forward!(output, expert, input)
         return nothing
     end
-    
+    #to be called in later phase
     # CUR decomposition computation: A ≈ C * U * R
     # For w1: temp1 = R1 * input, temp2 = U1 * temp1, gate = C1 * temp2
     # For w3: temp1 = R3 * input, temp2 = U3 * temp1, up = C3 * temp2  
@@ -225,7 +219,6 @@ function cur_expert_forward!(output::Vector{Float32}, expert::MoEExpertWeights, 
     
     return nothing
 end
-
 """
     process_shared_experts!(state::MoERunState, layer::MoETransformerLayerWeights, config::MoELlamaConfig)
 
@@ -345,7 +338,7 @@ function efficient_moe_transformer!(token::Int, pos::Int, model::MoELanguageMode
     # Forward through layers with early exit on NaN/Inf
     for (layer_idx, layer) in enumerate(weights.layers)
         # Attention
-        moe_attention!(state, layer, pos, config)
+        moe_attention!(state, layer, pos, config, layer_idx)
         
         # Check for numerical issues
         if !all(isfinite.(state.xb2))

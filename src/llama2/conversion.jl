@@ -84,14 +84,14 @@ function convert_to_moe(model::Llama2.LanguageModel, moe_layers::Vector{Int};
     converted_layers = convert_transformer_layers(model, moe_config, moe_layers, expert_init_strategy)
     
     # Create MoE weights structure
-    moe_weights = MoETransformerWeights(
-        copy(model.weights.token_embedding_table),  # Preserve token embeddings
-        converted_layers,
-        copy(model.weights.rms_final_weight),       # Preserve final norm
-        copy(model.weights.output_weight),          # Preserve output weights
-        moe_config,
-        create_conversion_info(model, moe_layers, expert_init_strategy)
-    )
+moe_weights = MoETransformerWeights(
+    copy(model.weights.token_embedding_table),  # 1st ✓
+    copy(model.weights.rms_final_weight),       # 2nd ✓ (MOVE THIS UP)
+    copy(model.weights.output_weight),          # 3rd ✓ (MOVE THIS UP)
+    converted_layers,                           # 4th ✓ (MOVE THIS DOWN)
+    moe_config,                                 # 5th ✓
+    create_conversion_info(model, moe_layers, expert_init_strategy)  # 6th ✓
+)
     
     # Create MoE model
     moe_model = MoELanguageModel(
@@ -345,11 +345,6 @@ function create_single_expert(original_layer::Llama2.TransformerLayerWeights,
     end
 end
 
-"""
-    create_cur_expert(w1, w2, w3, moe_config)
-
-Create CUR-compressed expert from full weight matrices.
-"""
 function create_cur_expert(w1::AbstractMatrix, w2::AbstractMatrix, w3::AbstractMatrix,
                           moe_config::MoELlamaConfig)
     

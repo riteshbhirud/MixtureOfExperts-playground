@@ -7,13 +7,13 @@ implementation, including proper RoPE and KV caching.
 
 """
     moe_attention!(state::MoERunState, layer::MoETransformerLayerWeights, 
-                   pos::Int, config::MoELlamaConfig)
+                   pos::Int, config::MoELlamaConfig, layer_idx::Int)
 
 Complete multi-head attention computation with RoPE and KV caching.
 Exactly matches Llama2's attention implementation.
 """
 function moe_attention!(state::MoERunState, layer::MoETransformerLayerWeights, 
-                       pos::Int, config::MoELlamaConfig)
+                       pos::Int, config::MoELlamaConfig, layer_idx::Int)  # ADD layer_idx parameter
     # Extract Llama2 layer weights
     llama_layer = layer.llama_layer
     
@@ -25,8 +25,10 @@ function moe_attention!(state::MoERunState, layer::MoETransformerLayerWeights,
     Llama2.matmul!(state.k, llama_layer.wk, state.xb) 
     Llama2.matmul!(state.v, llama_layer.wv, state.xb)
     
-    # Get layer index for KV cache
-    layer_idx = findfirst(l -> l === layer, config.weights.layers)
+    # REMOVE THIS LINE:
+    # layer_idx = findfirst(l -> l === layer, config.weights.layers)
+    
+    # Use the layer_idx parameter directly
     kv_cache = state.kvcache_layers[layer_idx]
     
     # Reshape for multi-head attention
@@ -47,7 +49,7 @@ function moe_attention!(state::MoERunState, layer::MoETransformerLayerWeights,
     
     # Store K,V in cache for this position
     copyto!(view(kv_cache.key_cache, :, :, pos), k_reshaped)
-    copyto!(view(kv_cache.value_cache, pos, :, :), permutedims(v_reshaped))
+    copyto!(view(kv_cache.value_cache, pos, :, :), v_reshaped)
     
     # Compute attention weights and apply to values
     compute_attention_output!(state, kv_cache, q_reshaped, pos, config)

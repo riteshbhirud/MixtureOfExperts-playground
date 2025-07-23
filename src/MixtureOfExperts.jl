@@ -59,6 +59,7 @@ if LLAMA2_AVAILABLE
     export get_expert_stats, get_routing_stats, compare_models
     export create_moe_llama_config, validate_moe_model
     export expert_usage_analysis, routing_entropy_analysis
+    export create_moe_expert_weights, create_moe_run_state
 end
 
 # Include existing files (unchanged)
